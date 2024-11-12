@@ -84,9 +84,8 @@ resource "aws_route_table_association" "public_route_table_association" {
 resource "aws_flow_log" "vpc_flow_log" {
   vpc_id         = aws_vpc.main_vpc.id
   traffic_type   = "ALL"
-  log_group_name = "vpc-flow-logs"
+  log_group_name = "vpc-flow-logs" 
   log_stream_name = "vpc-flow-stream"
 
-  # Optional: Provide an IAM role if required
-  iam_role_arn = "arn:aws:iam::YOUR_ACCOUNT_ID:role/YOUR_IAM_ROLE"
+  # Optional: Provide an IAM role if required iam_role_arn = "arn:aws:iam::YOUR_ACCOUNT_ID:role/YOUR_IAM_ROLE"
 }
