@@ -13,13 +13,28 @@ resource "aws_vpc" "main_vpc" {
   }
 }
 
-# Create a public subnet
+# Create a public subnet in availability zone us-east-1a
 # tfsec:ignore:aws-ec2-no-public-ip-subnet
-resource "aws_subnet" "public_subnet" {
+resource "aws_subnet" "public_subnet_1" {
   vpc_id            = aws_vpc.main_vpc.id
   cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-east-1a"  # Change to the availability zone you want
+  availability_zone = "us-east-1a"  # First subnet in us-east-1a
   map_public_ip_on_launch = true
+  tags = {
+    Name = "public-subnet-1"
+  }
+}
+
+# Create a second public subnet in the same availability zone (us-east-1a)
+# tfsec:ignore:aws-ec2-no-public-ip-subnet
+resource "aws_subnet" "public_subnet_2" {
+  vpc_id            = aws_vpc.main_vpc.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "us-east-1a"  # Second subnet in the same availability zone
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "public-subnet-2"
+  }
 }
 
 # Create an Internet Gateway and attach it to the VPC
@@ -78,9 +93,14 @@ resource "aws_route_table" "public_route_table" {
   }
 }
 
-# Associate the route table with the public subnet
-resource "aws_route_table_association" "public_route_table_association" {
-  subnet_id      = aws_subnet.public_subnet.id
+# Associate the route table with both public subnets
+resource "aws_route_table_association" "public_route_table_association_1" {
+  subnet_id      = aws_subnet.public_subnet_1.id
+  route_table_id = aws_route_table.public_route_table.id
+}
+
+resource "aws_route_table_association" "public_route_table_association_2" {
+  subnet_id      = aws_subnet.public_subnet_2.id
   route_table_id = aws_route_table.public_route_table.id
 }
 
@@ -92,12 +112,19 @@ resource "aws_ssm_parameter" "vpc_id_parameter" {
   value       = aws_vpc.main_vpc.id
 }
 
-# Store the Subnet ID in SSM Parameter Store
-resource "aws_ssm_parameter" "subnet_id_parameter" {
-  name        = "/my-vpc/public-subnet-id"
-  description = "Public Subnet ID"
+# Store the Subnet IDs in SSM Parameter Store
+resource "aws_ssm_parameter" "subnet_id_parameter_1" {
+  name        = "/my-vpc/public-subnet-id-1"
+  description = "Public Subnet ID - 1"
   type        = "String"
-  value       = aws_subnet.public_subnet.id
+  value       = aws_subnet.public_subnet_1.id
+}
+
+resource "aws_ssm_parameter" "subnet_id_parameter_2" {
+  name        = "/my-vpc/public-subnet-id-2"
+  description = "Public Subnet ID - 2"
+  type        = "String"
+  value       = aws_subnet.public_subnet_2.id
 }
 
 # Store the Security Group ID in SSM Parameter Store
