@@ -5,8 +5,8 @@ provider "aws" {
 # Create a VPC
 # tfsec:ignore:aws-ec2-require-vpc-flow-logs-for-all-vpcs
 resource "aws_vpc" "main_vpc" {
-  cidr_block = "10.0.0.0/16"
-  enable_dns_support = true
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
   enable_dns_hostnames = true
   tags = {
     Name = "my-vpc"  # Name for the VPC
@@ -82,4 +82,28 @@ resource "aws_route_table" "public_route_table" {
 resource "aws_route_table_association" "public_route_table_association" {
   subnet_id      = aws_subnet.public_subnet.id
   route_table_id = aws_route_table.public_route_table.id
+}
+
+# Store the VPC ID in SSM Parameter Store
+resource "aws_ssm_parameter" "vpc_id_parameter" {
+  name        = "/my-vpc/id"
+  description = "VPC ID"
+  type        = "String"
+  value       = aws_vpc.main_vpc.id
+}
+
+# Store the Subnet ID in SSM Parameter Store
+resource "aws_ssm_parameter" "subnet_id_parameter" {
+  name        = "/my-vpc/public-subnet-id"
+  description = "Public Subnet ID"
+  type        = "String"
+  value       = aws_subnet.public_subnet.id
+}
+
+# Store the Security Group ID in SSM Parameter Store
+resource "aws_ssm_parameter" "security_group_id_parameter" {
+  name        = "/my-vpc/security-group-id"
+  description = "Security Group ID"
+  type        = "String"
+  value       = aws_security_group.allow_vpc_traffic.id
 }
