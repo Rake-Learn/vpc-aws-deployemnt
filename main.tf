@@ -70,7 +70,7 @@ resource "aws_security_group" "allow_vpc_traffic" {
     from_port       = 0
     to_port         = 0
     protocol        = "tcp"
-    security_groups = [aws_security_group.allow_all_traffic.id]  # Allow traffic from within the same SG
+    self            = true  # Allows traffic within the same SG
   }
 
   ingress {
