@@ -59,6 +59,12 @@ resource "aws_security_group" "allow_vpc_traffic" {
     cidr_blocks = ["0.0.0.0/0"]  # Allow HTTP traffic from anywhere
   }
   ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "SSH"
+    cidr_blocks = ["0.0.0.0/0"]  # Allow HTTP traffic from anywhere
+  }
+  ingress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"  # "-1" allows all protocols
@@ -67,16 +73,16 @@ resource "aws_security_group" "allow_vpc_traffic" {
 
   # Allow all TCP traffic within the same security group
   ingress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "tcp"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "HTTP"
     self            = true  # Allows traffic within the same SG
   }
 
   ingress {
     from_port   = 443
     to_port     = 443
-    protocol    = "tcp"
+    protocol    = "HTTPS"
     cidr_blocks = ["0.0.0.0/0"]  # Allow HTTPS traffic from anywhere
   }
 
